@@ -1,11 +1,11 @@
 .data 0x10002000
-.ascii " ##0 ###"
-.ascii "  $ @  *"
-.ascii "      @#"
-.ascii "1@###$ 2"
+.ascii " ##  ###"
+.ascii "  $ @ @*"
+.ascii "       #"
+.ascii " @###$  "
 .ascii "        "
 .ascii "  @#### "
-.ascii "   3  $ "
+.ascii "      $ "
 .ascii "S ## ## "
 
 .align 8
@@ -14,7 +14,7 @@ prompt: .asciiz "Player (S): w to go up, d to go left, s to go down, a to go lef
 exit: .asciiz "\n\n\n\n\n\n---------------------------------------\nPlayer has succesfully exited the map!\n---------------------------------------"
 .align 6
 blocked_path: .asciiz "\nOut of bounds or blocked path try a different move"
-.align 6
+.align 6 
 new_line: .asciiz "\n"
 .align 6
 bar: .asciiz "\n--------"
@@ -76,6 +76,9 @@ ori $23, $0, 35
 
 ## $22 is '$' ##
 ori $22, $0, 0x24
+
+## $21 is '@' ##
+ori $21, $0, 0x40
 
 ## action applied ##
 ## 0x77 = 'w' ##
@@ -168,6 +171,10 @@ or $0, $0, $0
 beq $10, $22, coin
 or $0, $0, $0
 
+## Checks if there is a demon that the player will run into ##
+beq $10, $21, demon
+or $0, $0, $0
+
 ## replaces old position with ' ' ##
 ori $10, $0, 32
 sb $10, dynamic_map($24)
@@ -218,6 +225,27 @@ or $0, $0, $0
 j main_loop
 
 #############################################
+demon:
+## sets player to original position ##
+ori $10, $0, 83
+ori $25, $0, 56 
+
+sb $10, dynamic_map($25)
+or $0, $0, $0
+
+## saves new location ##
+sb $25, player_loc
+or $0, $0, $0
+
+## replaces old position with ' ' ##
+ori $10, $0, 32
+sb $10, dynamic_map($24)
+or $0, $0, $0
+
+j main_loop
+or $0, $0, $0
+
+#############################################
 
 move_right:
 ## $18 represents Column 7 ##
@@ -246,6 +274,10 @@ or $0, $0, $0
 
 ## Checks if there is a potion that the player will collect ##
 beq $10, $22, coin
+or $0, $0, $0
+
+## Checks if there is a demon that the player will run into ##
+beq $10, $21, demon
 or $0, $0, $0
 
 ## replaces old position with ' ' ##
@@ -294,6 +326,10 @@ or $0, $0, $0
 beq $10, $22, coin
 or $0, $0, $0
 
+## Checks if there is a demon that the player will run into ##
+beq $10, $21, demon
+or $0, $0, $0
+
 ## replaces old position with ' ' ##
 ori $10, $0, 32
 sb $10, dynamic_map($24)
@@ -339,6 +375,10 @@ or $0, $0, $0
 
 ## Checks if there is a potion that the player will collect ##
 beq $10, $22, coin
+or $0, $0, $0
+
+## Checks if there is a demon that the player will run into ##
+beq $10, $21, demon
 or $0, $0, $0
 
 ## replaces old position with ' ' ##
