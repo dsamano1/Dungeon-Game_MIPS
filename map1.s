@@ -8,12 +8,33 @@
 .ascii "      $ "
 .ascii "S ## ## "
 
+.align 12
+main_console:
+.ascii "\n<---------------------------------->\n"
+.ascii "______                            \n"
+.ascii "|  _  \                           \n"
+.ascii "| | | |___ _ __ ___   ___  _ __   \n"
+.ascii "| | | / _ \ '_ ` _ \ / _ \| '_ \  \n"
+.ascii "| |/ /  __/ | | | | | (_) | | | | \n"
+.ascii "|___/ \___|_| |_| |_|\___/|_| |_| \n"
+.ascii "                                  \n"
+.ascii "                                  \n"
+.ascii "           ______                 \n"
+.ascii "           | ___ \                \n"
+.ascii "           | |_/ /   _ _ __       \n"
+.ascii "           |    / | | | '_ \      \n"
+.ascii "           | |\ \ |_| | | | |     \n"
+.ascii "           \_| \_\__,_|_| |_|     \n"
+.asciiz "<---------------------------------->\n"
+
 .align 8
-prompt: .asciiz "Player (S): w to go up, d to go left, s to go down, a to go left. Avoid the demons!(@), and find the exit gate!(*)"
+prompt: .asciiz "Player (S): \n(w to go up) \n(d to go left) \n(s to go down) \n(a to go left) \nAvoid the demons!(@), and find the exit gate!(*) \n(press p to open up shop menu)"
 .align 8
 exit: .asciiz "\n\n\n\n\n\n---------------------------------------\nPlayer has succesfully exited the map!\n---------------------------------------"
 .align 6
 blocked_path: .asciiz "\nOut of bounds or blocked path try a different move"
+.align 6
+demon_prompt: .asciiz "\nYou have been killed by a demon, if only there was a sword we can buy to kill them..."
 .align 6 
 new_line: .asciiz "\n"
 .align 6
@@ -116,6 +137,11 @@ sb $9, coins
 ## tells the user how to play ##
 ori $2, $0, 4
 la $4, prompt
+syscall
+
+## main prompt ##
+ori $2, $0, 4
+la $4, main_console
 syscall
 
 jr $31
@@ -226,6 +252,10 @@ j main_loop
 
 #############################################
 demon:
+ori $2, $0, 4
+la $4, demon_prompt
+syscall
+
 ## sets player to original position ##
 ori $10, $0, 83
 ori $25, $0, 56 
