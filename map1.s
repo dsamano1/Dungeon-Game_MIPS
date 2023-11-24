@@ -8,7 +8,8 @@
 .ascii "      $ "
 .ascii "S ## ## "
 
-.align 12
+
+.align 16
 main_console:
 .ascii "\n<---------------------------------->\n"
 .ascii "______                            \n"
@@ -27,6 +28,17 @@ main_console:
 .ascii "           \_| \_\__,_|_| |_|     \n"
 .asciiz "<---------------------------------->\n"
 
+.align 16
+store:
+.ascii "Press the respected number 1,2,3 to buy a sword.\n" 
+.ascii "++++++++++++++++++++++++++++++++\n"
+.ascii "+        SWORD STORE           +\n"
+.ascii "+ (1)dull-sword $100           +\n"
+.ascii "+ (2)average-sword $200        +\n"
+.ascii "+ (3)GRAND-SWORD $300          +\n"
+.ascii "+                              +\n"
+.asciiz "++++++++++++++++++++++++++++++++\n"
+
 .align 8
 prompt: .asciiz "Player (S): \n(w to go up) \n(d to go left) \n(s to go down) \n(a to go left) \nAvoid the demons!(@), and find the exit gate!(*) \n(press p to open up shop menu)"
 .align 8
@@ -38,7 +50,7 @@ demon_prompt: .asciiz "\nYou have been killed by a demon, if only there was a sw
 .align 6 
 new_line: .asciiz "\n"
 .align 6
-bar: .asciiz "\n--------"
+bar: .asciiz "\n------------"
 .align 6
 coins_amount: .asciiz "\ncoins: "
 .align 8
@@ -48,7 +60,22 @@ player_loc: .space 4
 .align 6
 coins: .space 4
 .align 6
-potion_loc: .space 4
+sword: .space 4
+.align 6
+sword_endurance: .space 4
+.align 6
+sword_string: .asciiz "\nSword Endurance: "
+.align 6
+equipment: .asciiz "\nEquipped: "
+.align 6
+null: .asciiz "none"
+.align 6
+dSword: .asciiz "dull-sword"
+.align 6
+aSword: .asciiz "average-sword"
+.align 6
+gSword: .asciiz "GRAND-SWORD"
+
 .align 8
 dynamic_map: .space 65
 
@@ -102,6 +129,11 @@ ori $22, $0, 0x24
 ori $21, $0, 0x40
 
 ## action applied ##
+
+## 0x70 = 'p' ##
+ori $13, $0, 0x70
+beq $5, $13, store_menu
+
 ## 0x77 = 'w' ##
 ori $13, $0, 0x77
 beq $5, $13, move_up
@@ -143,6 +175,11 @@ syscall
 ori $2, $0, 4
 la $4, main_console
 syscall
+
+## Set $19 = 0
+add $19, $0, $0
+sb $19, sword
+sb $19, sword_endurance
 
 jr $31
 
@@ -252,6 +289,8 @@ j main_loop
 
 #############################################
 demon:
+lbu $19, sword_endurance
+bne $19, $0, kill_demon
 ori $2, $0, 4
 la $4, demon_prompt
 syscall
@@ -277,6 +316,34 @@ or $0, $0, $0
 
 #############################################
 
+kill_demon:
+lbu $19, sword_endurance
+addi $19, $19, -1
+sb $19, sword_endurance
+## replaces old position with ' ' ##
+ori $10, $0, 32
+sb $10, dynamic_map($24)
+or $0, $0, $0
+
+
+## sets player to new position ##
+ori $10, $0, 83
+sb $10, dynamic_map($25)
+or $0, $0, $0
+
+## saves new location ##
+sb $25, player_loc
+or $0, $0, $0
+
+beq $19, $0, setNone
+
+j main_loop
+
+setNone:
+sb $19, sword
+
+j main_loop
+#############################################
 move_right:
 ## $18 represents Column 7 ##
 ori $18, $0, 7      
@@ -429,6 +496,19 @@ or $0, $0, $0
 j main_loop
 
 #############################################
+store_menu:
+ori $2, $0, 4
+la $4, store
+syscall
+
+ori $2, $0, 12
+syscall
+
+sb $2, sword
+
+j main_loop
+
+#############################################
 design_map:
 lbu $17, dynamic_map($8)
 or $0, $0, $0
@@ -477,10 +557,91 @@ ori $2, $0, 4
 la $4, bar
 syscall
 
+ori $2, $0, 4
+la $4, sword_string
+syscall
+
+lbu $19, sword_endurance
+ori $2, $0, 1
+add $4, $0, $19
+syscall
+
+ori $2, $0, 4
+la $4, bar
+syscall
+
+ori $2, $0, 4
+la $4, equipment
+syscall
+
+
+###### LOGIC ERROR HERE FINISH, MAYBE DECIDE EQUIPPED SWORD BASED ON DURABILITY ########
+lbu $19, sword
+## Checks for equipped sword ##
+ori $6, $0, 49
+beq $19, $6, dull
+ori $6, $0, 50
+beq $19, $6, average
+ori $6, $0, 51
+beq $19, $6, grand
+
+ori $2, $0, 4
+la $4, null
+syscall
+
+ori $2, $0, 4
+la $4, bar
+syscall
+
 jr $31
 or $0, $0, $0
 #############################################
+dull:
+addi $19, $0, 1
+sb $19, sword_endurance
 
+ori $2, $0, 4
+la $4, dSword
+syscall
+
+ori $2, $0, 4
+la $4, bar
+syscall
+
+jr $31
+or $0, $0, $0
+#############################################
+average:
+addi $19, $0, 2
+sb $19, sword_endurance
+
+ori $2, $0, 4
+la $4, aSword
+syscall
+
+ori $2, $0, 4
+la $4, bar
+syscall
+
+jr $31
+or $0, $0, $0
+#############################################
+grand:
+addi $19, $0, 3
+sb $19, sword_endurance
+
+ori $2, $0, 4
+la $4, gSword
+syscall
+
+ori $2, $0, 4
+la $4, bar
+syscall
+
+jr $31
+or $0, $0, $0
+
+###############################################
 exit_map:
 ## prompt player successfully left the map ##
 ori $2, $0, 4
