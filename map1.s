@@ -19,7 +19,6 @@ main_console:
 .ascii "| |/ /  __/ | | | | | (_) | | | | \n"
 .ascii "|___/ \___|_| |_| |_|\___/|_| |_| \n"
 .ascii "                                  \n"
-.ascii "                                  \n"
 .ascii "           ______                 \n"
 .ascii "           | ___ \                \n"
 .ascii "           | |_/ /   _ _ __       \n"
@@ -30,23 +29,58 @@ main_console:
 
 .align 16
 store:
-.ascii "Press the respected number 1,2,3 to buy a sword.\n" 
+.ascii "++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n"
+.ascii "+Press the respected number [1] [2] [3] to buy a sword.+\n" 
+.ascii "++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n"
 .ascii "++++++++++++++++++++++++++++++++\n"
 .ascii "+        SWORD STORE           +\n"
-.ascii "+ (1)dull-sword $100           +\n"
-.ascii "+ (2)average-sword $200        +\n"
-.ascii "+ (3)GRAND-SWORD $300          +\n"
+.ascii "+ (1)dull-sword:    |$100|     +\n"
+.ascii "+ (2)average-sword: |$200|     +\n"
+.ascii "+ (3)GRAND-SWORD:   |$300|     +\n"
 .ascii "+                              +\n"
 .asciiz "++++++++++++++++++++++++++++++++\n"
 
+.align 6
+purchased: 
+.ascii "++++++++++++++++++++++++++\n"
+.ascii "+ Purchased Successfull! +\n"
+.asciiz "++++++++++++++++++++++++++\n"
+
 .align 8
 prompt: .asciiz "Player (S): \n(w to go up) \n(d to go left) \n(s to go down) \n(a to go left) \nAvoid the demons!(@), and find the exit gate!(*) \n(press p to open up shop menu)"
-.align 8
-exit: .asciiz "\n\n\n\n\n\n---------------------------------------\nPlayer has succesfully exited the map!\n---------------------------------------"
+.align 10
+exit:
+.ascii "\n\n\n\n\n\n---------------------------------------\nPlayer has succesfully exited the map!\n---------------------------------------"
+.ascii "\n__   __\n"               
+.ascii "\ \ / /\n"               
+.ascii " \ V /___  _   _\n"      
+.ascii "  \ // _ \| | | |\n"     
+.ascii "  | | (_) | |_| |\n"     
+.ascii "  \_/\___/ \__,_|\n"     
+.ascii "                 \n" 
+.ascii "                 \n"     
+.ascii "   _    _ _         _\n"
+.ascii "  | |  | (_)       | |\n"
+.ascii "  | |  | |_ _ __   | |\n"
+.ascii "  | |/\| | | '_ \  | |\n"
+.ascii "  \  /\  / | | | | |_|\n"
+.asciiz "   \/  \/|_|_| |_| (_)\n"
+
 .align 6
 blocked_path: .asciiz "\nOut of bounds or blocked path try a different move"
 .align 6
-demon_prompt: .asciiz "\nYou have been killed by a demon, if only there was a sword we can buy to kill them..."
+demon_prompt: 
+.ascii "+++++++++++++++++++++++++++++++++++++++++++++++++++++++\n"
+.ascii "+          You have been killed by a demon            +\n"
+.ascii "+ If only there was a sword we can buy to kill them...+\n"
+.ascii "+               hint: (press p)                       +\n"
+.asciiz "+++++++++++++++++++++++++++++++++++++++++++++++++++++++\n"
+.align 8
+low: 
+.ascii "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+.ascii "+++++++++++++++++++++++++++++++++++++\n"
+.ascii "+Insufficient Coins, collect more $!+\n"
+.asciiz "+++++++++++++++++++++++++++++++++++++\n"
 .align 6 
 new_line: .asciiz "\n"
 .align 6
@@ -149,6 +183,10 @@ beq $5, $13, move_down
 ## 0x61 = 'a' ##
 ori $13, $0, 0x61
 beq $5, $13, move_left
+
+## 0x74  = 't' ##
+ori $13, $0, 0x74
+beq $5, $13, exit_map
 
 ###############################################
 initializer:
@@ -504,10 +542,8 @@ syscall
 ori $2, $0, 12
 syscall
 
-sb $2, sword
-
-lbu $19, sword
-## Checks for equipped sword ##
+add $19, $2, $0
+## Checks for purchasing sword ##
 ori $6, $0, 49
 beq $19, $6, one
 ori $6, $0, 50
@@ -518,20 +554,63 @@ beq $19, $6, three
 j main_loop
 
 one:
+slti $10, $9, 100
+bne $10, $0, insufficient
+sb $19, sword
+addi $9, $9, -100
 addi $19, $0, 1
 sb $19, sword_endurance
+
+ori $2, $0, 4
+la $4, spacer
+syscall
+
+ori $2, $0, 4
+la $4, purchased
+syscall
+
 j main_loop
 
 two:
+slti $10, $9, 200
+bne $10, $0, insufficient
+sb $19, sword
 addi $19, $0, 2
+addi $9, $9, -200
 sb $19, sword_endurance
+
+ori $2, $0, 4
+la $4, spacer
+syscall
+
+ori $2, $0, 4
+la $4, purchased
+syscall
 j main_loop
 
 three:
+slti $10, $9, 300
+bne $10, $0, insufficient
+sb $19, sword
 addi $19, $0, 3
+addi $9, $9, -300
 sb $19, sword_endurance
+
+ori $2, $0, 4
+la $4, spacer
+syscall
+
+ori $2, $0, 4
+la $4, purchased
+syscall
 j main_loop
 
+insufficient:
+ori $2, $0, 4
+la $4, low
+syscall
+
+j main_loop
 
 #############################################
 design_map:
