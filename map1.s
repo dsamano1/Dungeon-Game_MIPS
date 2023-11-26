@@ -506,7 +506,32 @@ syscall
 
 sb $2, sword
 
+lbu $19, sword
+## Checks for equipped sword ##
+ori $6, $0, 49
+beq $19, $6, one
+ori $6, $0, 50
+beq $19, $6, two
+ori $6, $0, 51
+beq $19, $6, three
+
 j main_loop
+
+one:
+addi $19, $0, 1
+sb $19, sword_endurance
+j main_loop
+
+two:
+addi $19, $0, 2
+sb $19, sword_endurance
+j main_loop
+
+three:
+addi $19, $0, 3
+sb $19, sword_endurance
+j main_loop
+
 
 #############################################
 design_map:
@@ -575,7 +600,6 @@ la $4, equipment
 syscall
 
 
-###### LOGIC ERROR HERE FINISH, MAYBE DECIDE EQUIPPED SWORD BASED ON DURABILITY ########
 lbu $19, sword
 ## Checks for equipped sword ##
 ori $6, $0, 49
@@ -597,9 +621,6 @@ jr $31
 or $0, $0, $0
 #############################################
 dull:
-addi $19, $0, 1
-sb $19, sword_endurance
-
 ori $2, $0, 4
 la $4, dSword
 syscall
@@ -612,9 +633,6 @@ jr $31
 or $0, $0, $0
 #############################################
 average:
-addi $19, $0, 2
-sb $19, sword_endurance
-
 ori $2, $0, 4
 la $4, aSword
 syscall
@@ -627,9 +645,6 @@ jr $31
 or $0, $0, $0
 #############################################
 grand:
-addi $19, $0, 3
-sb $19, sword_endurance
-
 ori $2, $0, 4
 la $4, gSword
 syscall
