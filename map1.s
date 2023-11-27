@@ -117,7 +117,8 @@ dynamic_map: .space 65
 
 main:
 ori $2, $0, 4
-la $4, spacer
+lui $4, 4097
+ori $4, $4, 2560
 syscall
 ## creates original static map
 jal initial_map
@@ -130,9 +131,11 @@ or $0, $0, $0
 main_loop:
 ## Checks player's location ##
 lbu $15, player_loc
+or $0, $0, $0   #NOP
 
 ##Checks if game is terminated ##
 beq $14, $15, exit_map
+or $0, $0, $0   #NOP
 
 ## set up registers for looping 65 times to update map ##
 ori $11, $0, 65
@@ -167,26 +170,32 @@ ori $21, $0, 0x40
 ## 0x70 = 'p' ##
 ori $13, $0, 0x70
 beq $5, $13, store_menu
+or $0, $0, $0   #NOP
 
 ## 0x77 = 'w' ##
 ori $13, $0, 0x77
 beq $5, $13, move_up
+or $0, $0, $0   #NOP
 
 ## 0x64 = 'd' ##
 ori $13, $0, 0x64
 beq $5, $13, move_right 
+or $0, $0, $0   #NOP
 
 ## 0x73 = 's' ##
 ori $13, $0, 0x73
 beq $5, $13, move_down
+or $0, $0, $0   #NOP
 
 ## 0x61 = 'a' ##
 ori $13, $0, 0x61
 beq $5, $13, move_left
+or $0, $0, $0   #NOP
 
 ## 0x74  = 't' ##
 ori $13, $0, 0x74
 beq $5, $13, exit_map
+or $0, $0, $0   #NOP
 
 ###############################################
 initializer:
@@ -203,6 +212,7 @@ ori $14, $0, 15
 ## set coins = 0 ##
 add $9, $0, $0
 sb $9, coins
+or $0, $0, $0   #NOP
 
 ## tells the user how to play ##
 ori $2, $0, 4
@@ -217,9 +227,12 @@ syscall
 ## Set $19 = 0
 add $19, $0, $0
 sb $19, sword
+or $0, $0, $0   #NOP
 sb $19, sword_endurance
+or $0, $0, $0   #NOP
 
 jr $31
+or $0, $0, $0   #NOP
 
 ###############################################
 initial_map:
@@ -258,6 +271,7 @@ mflo $2
 
 ## Checks for borders/obstacles ##
 beq $2, $18, wall
+or $0, $0, $0   #NOP
 
 ## moves player to up ##
 addi $25, $24, -8
@@ -291,6 +305,7 @@ sb $25, player_loc
 or $0, $0, $0
 
 j main_loop
+or $0, $0, $0   #NOP
 
 #############################################
 wall:
@@ -324,11 +339,14 @@ sb $25, player_loc
 or $0, $0, $0
 
 j main_loop
+or $0, $0, $0   #NOP
 
 #############################################
 demon:
 lbu $19, sword_endurance
+or $0, $0, $0   #NOP
 bne $19, $0, kill_demon
+or $0, $0, $0   #NOP
 ori $2, $0, 4
 la $4, demon_prompt
 syscall
@@ -358,6 +376,7 @@ kill_demon:
 lbu $19, sword_endurance
 addi $19, $19, -1
 sb $19, sword_endurance
+or $0, $0, $0   #NOP
 ## replaces old position with ' ' ##
 ori $10, $0, 32
 sb $10, dynamic_map($24)
@@ -374,13 +393,17 @@ sb $25, player_loc
 or $0, $0, $0
 
 beq $19, $0, setNone
+or $0, $0, $0   #NOP
 
 j main_loop
+or $0, $0, $0   #NOP
 
 setNone:
 sb $19, sword
+or $0, $0, $0   #NOP
 
 j main_loop
+or $0, $0, $0   #NOP
 #############################################
 move_right:
 ## $18 represents Column 7 ##
@@ -396,6 +419,7 @@ mfhi $2
 
 ## Checks if player is at the edge of a border ##
 beq $2, $18, wall
+or $0, $0, $0   #NOP
 
 ## moves player to the right ##
 addi $25, $24, 1
@@ -431,6 +455,7 @@ sb $25, player_loc
 or $0, $0, $0
 
 j main_loop
+or $0, $0, $0   #NOP
 
 #############################################
 
@@ -447,6 +472,7 @@ mflo $2
 
 ## Checks for borders/obstacles ##
 beq $2, $18, wall
+or $0, $0, $0   #NOP
 
 ## moves player to up ##
 addi $25, $24, 8
@@ -480,6 +506,7 @@ sb $25, player_loc
 or $0, $0, $0
 
 j main_loop
+or $0, $0, $0   #NOP
 
 #############################################
 
@@ -497,6 +524,7 @@ mfhi $2
 
 ## Checks if player is at the edge of a border ##
 beq $2, $18, wall
+or $0, $0, $0   #NOP
 
 ## moves player to the left ##
 addi $25, $24, -1
@@ -532,6 +560,7 @@ sb $25, player_loc
 or $0, $0, $0
 
 j main_loop
+or $0, $0, $0   #NOP
 
 #############################################
 store_menu:
@@ -546,20 +575,27 @@ add $19, $2, $0
 ## Checks for purchasing sword ##
 ori $6, $0, 49
 beq $19, $6, one
+or $0, $0, $0   #NOP
 ori $6, $0, 50
 beq $19, $6, two
+or $0, $0, $0   #NOP
 ori $6, $0, 51
 beq $19, $6, three
+or $0, $0, $0   #NOP
 
 j main_loop
+or $0, $0, $0   #NOP
 
 one:
 slti $10, $9, 100
 bne $10, $0, insufficient
+or $0, $0, $0   #NOP
 sb $19, sword
+or $0, $0, $0   #NOP
 addi $9, $9, -100
 addi $19, $0, 1
 sb $19, sword_endurance
+or $0, $0, $0   #NOP
 
 ori $2, $0, 4
 la $4, spacer
@@ -570,14 +606,18 @@ la $4, purchased
 syscall
 
 j main_loop
+or $0, $0, $0   #NOP
 
 two:
 slti $10, $9, 200
 bne $10, $0, insufficient
+or $0, $0, $0   #NOP
 sb $19, sword
+or $0, $0, $0   #NOP
 addi $19, $0, 2
 addi $9, $9, -200
 sb $19, sword_endurance
+or $0, $0, $0   #NOP
 
 ori $2, $0, 4
 la $4, spacer
@@ -587,14 +627,18 @@ ori $2, $0, 4
 la $4, purchased
 syscall
 j main_loop
+or $0, $0, $0   #NOP
 
 three:
 slti $10, $9, 300
 bne $10, $0, insufficient
+or $0, $0, $0   #NOP
 sb $19, sword
+or $0, $0, $0   #NOP
 addi $19, $0, 3
 addi $9, $9, -300
 sb $19, sword_endurance
+or $0, $0, $0   #NOP
 
 ori $2, $0, 4
 la $4, spacer
@@ -604,6 +648,7 @@ ori $2, $0, 4
 la $4, purchased
 syscall
 j main_loop
+or $0, $0, $0   #NOP
 
 insufficient:
 ori $2, $0, 4
@@ -611,6 +656,7 @@ la $4, low
 syscall
 
 j main_loop
+or $0, $0, $0   #NOP
 
 #############################################
 design_map:
@@ -666,6 +712,7 @@ la $4, sword_string
 syscall
 
 lbu $19, sword_endurance
+or $0, $0, $0   #NOP
 ori $2, $0, 1
 add $4, $0, $19
 syscall
@@ -680,13 +727,17 @@ syscall
 
 
 lbu $19, sword
+or $0, $0, $0   #NOP
 ## Checks for equipped sword ##
 ori $6, $0, 49
 beq $19, $6, dull
+or $0, $0, $0   #NOP
 ori $6, $0, 50
 beq $19, $6, average
+or $0, $0, $0   #NOP
 ori $6, $0, 51
 beq $19, $6, grand
+or $0, $0, $0   #NOP
 
 ori $2, $0, 4
 la $4, null
